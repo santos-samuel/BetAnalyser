@@ -3,10 +3,8 @@ package simulator.strategies;
 import simulator.ROLL;
 import simulator.Simulator;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,7 +15,7 @@ import java.util.stream.Collectors;
 * */
 public class WaitTwoStrategy extends Strategy {
 
-    private static final float BET_AMOUNT = (float) 1;
+    private static final BigDecimal BET_AMOUNT = BigDecimal.valueOf(1);
     private final Simulator simulator;
 
 
@@ -30,14 +28,14 @@ public class WaitTwoStrategy extends Strategy {
     public void processResult(ROLL roll) {
         if (didIBet) {
             if (roll.equals(betCoin)) {
-                balance = balance + betPotentialReturn;
+                balance = balance.add(betPotentialReturn).setScale(2, RoundingMode.HALF_UP);
             }
             resetBetInfo();
         }
     }
 
     @Override
-    public void handleNextDecision(ROLL roll) throws IOException {
+    public void handleNextDecision(ROLL roll) throws Exception {
         List<ROLL> previous2Rolls = simulator.getPreviousXRolls(2);
         if (previous2Rolls.size() == 2) {
             List<ROLL> ctFilter = previous2Rolls.stream().filter(r -> r.equals(ROLL.CT)).collect(Collectors.toList());

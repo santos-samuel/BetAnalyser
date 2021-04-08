@@ -1,12 +1,12 @@
 package simulator.strategies;
 
 import simulator.ROLL;
-import simulator.Simulator;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import static simulator.Simulator.LOG_FILE;
 
@@ -15,44 +15,49 @@ public abstract class Strategy {
 
     // last roll bet
     protected boolean didIBet = false;
-    protected float betPotentialReturn = -1;
+    protected BigDecimal betPotentialReturn = BigDecimal.valueOf(-1);
     protected ROLL betCoin = null;
-    protected float betAmount = -1;
+    protected BigDecimal betAmount = BigDecimal.valueOf(-1);
 
-    protected float balance = 0;
+    protected BigDecimal balance;
 
     public Strategy(String simpleName) {
         this.childName = simpleName;
+        balance = BigDecimal.valueOf(0);
+        balance = balance.setScale(2, RoundingMode.HALF_UP);
     }
 
     public abstract void processResult(ROLL roll);
 
-    public abstract void handleNextDecision(ROLL roll) throws IOException;
+    public abstract void handleNextDecision(ROLL roll) throws Exception;
     public abstract String print();
 
     protected void resetBetInfo() {
         didIBet = false;
-        betPotentialReturn = -1;
-        betAmount = -1;
+        betPotentialReturn = new BigDecimal(-1);
+        betAmount = new BigDecimal(-1);
         betCoin = null;
     }
 
-    protected void performBet(float amount, ROLL betCoin) {
+    protected void performBet(BigDecimal amount, ROLL betCoin) throws Exception {
+        if (amount.compareTo(new BigDecimal(0)) < 0 || betCoin == null)
+            throw new Exception();
         didIBet = true;
+        if (betCoin.equals(ROLL.CT) || betCoin.equals(ROLL.T)) {
+            betPotentialReturn = amount.multiply(new BigDecimal(2)).setScale(2, RoundingMode.HALF_UP);
+        }
+        else {
+            betPotentialReturn = amount.multiply(new BigDecimal(14)).setScale(2, RoundingMode.HALF_UP);
+        }
 
-        if (betCoin.equals(ROLL.CT) || betCoin.equals(ROLL.T))
-            betPotentialReturn = amount * 2;
-        else
-            betPotentialReturn = amount * 14;
-
-        betAmount = amount;
-        balance = balance - amount;
+        betAmount = amount.setScale(2, RoundingMode.HALF_UP);
+        balance = balance.subtract(amount).setScale(2, RoundingMode.HALF_UP);
     }
 
-    public void log(long round) throws IOException {
+    public void log(long round, String fileName) throws IOException {
         FileWriter fw = new FileWriter(LOG_FILE, true);
         BufferedWriter bw = new BufferedWriter(fw);
-        bw.write("" + round + "," + balance + "," + childName);
+        bw.write("" + round + "," + balance + "," + childName + "," + fileName);
         bw.newLine();
         bw.close();
     }

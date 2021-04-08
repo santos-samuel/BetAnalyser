@@ -1,10 +1,7 @@
 package simulator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import simulator.strategies.Strategy;
-import simulator.strategies.TCTMartingale;
-import simulator.strategies.WaitTwoStrategy;
-import simulator.strategies.WaitTwoStrategyButWatchPast100;
+import simulator.strategies.*;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -46,14 +43,14 @@ public class Simulator {
         lastPlays = new LastPlays();
         strategies = new ArrayList<>();
 
-        if (!LOG_FILE.exists())
+        if (LOG_FILE.exists())
             LOG_FILE.delete();
 
         LOG_FILE.createNewFile();
 
         FileWriter fw = new FileWriter(LOG_FILE, true);
         BufferedWriter bw = new BufferedWriter(fw);
-        bw.write("n,b,s");
+        bw.write("n,b,s,d");
         bw.newLine();
         bw.close();
     }
@@ -140,7 +137,7 @@ public class Simulator {
 
             for (Strategy strategy : strategies) {
                 strategy.processResult(roll);
-                strategy.log(i);
+                strategy.log(i, sortedSeedFiles[fileIndex]);
                 strategy.handleNextDecision(roll);
             }
             i++;
@@ -169,9 +166,10 @@ public class Simulator {
     public static void main(String[] args) throws Exception {
         Simulator simulator = new Simulator();
         List<Strategy> strategies = new ArrayList<>();
-        strategies.add(new WaitTwoStrategy(simulator));
-        strategies.add(new WaitTwoStrategyButWatchPast100(simulator));
-        strategies.add(new TCTMartingale(simulator));
+//        strategies.add(new WaitTwoStrategy(simulator));
+//        strategies.add(new WaitTwoStrategyButWatchPast100(simulator));
+//        strategies.add(new TCTMartingale(simulator));
+        strategies.add(new DiceStrategy(simulator));
         simulator.addStrategies(strategies);
         simulator.run();
 
