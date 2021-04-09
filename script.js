@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         CSGOEmpire Bet Script
-// @namespace    http://csgoempire.com/
+// @namespace    https://raw.githubusercontent.com/santos-samuel/BetAnalyser/master/script.js
 // @version      0.1
 // @description  Good luck!
 // @author       Samuel Santos
@@ -21,7 +21,7 @@ const STATUS_STOP = "STATUS_STOP"
 const STRATEGY_MARTINGALE = "MARTINGALE_STRAT";
 const STRATEGY_DICE = "DICE_STRAT";
 
-const DEBUG = true;
+const DEBUG = false;
 
 const WAIT_BEFORE_BET_TIME = 7;
 
